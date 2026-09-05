@@ -8,22 +8,20 @@ the GSI image. Carrier APNs are loaded from the SIM by modern modems
 and Android 12+ auto-configures APNs from the carrier. The full conf
 file is not needed on a GSI.
 ---
- target/product/gsi/Android.bp | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ target/product/gsi/Android.bp | 1 -
+ 1 file changed, 1 deletion(-)
 
 diff --git a/target/product/gsi/Android.bp b/target/product/gsi/Android.bp
-index 82d5705..250be15 100644
+index b5531a0..78e4eba 100644
 --- a/target/product/gsi/Android.bp
 +++ b/target/product/gsi/Android.bp
-@@ -132,7 +132,7 @@ android_filesystem_defaults {
-         "TrichromeChrome",
+@@ -125,7 +125,6 @@ android_filesystem_defaults {
          "Dialer",
          "LatinIME",
+         "TrichromeChrome",
 -        "apns-full-conf.xml",
-+        
          "frameworks-base-overlays",
-     ],
-     multilib: {
--- 
-2.54.0
+         "preinstalled-packages-base-product.xml",
 
+--
+2.55.0
