@@ -2,9 +2,6 @@ From d0b28ac0bbb498d75add3c207fefa7fb6484a5bd Mon Sep 17 00:00:00 2001
 From: "Christopher A. Williamson" <contact@chrisaw.io>
 Date: Tue, 17 Mar 2026 23:24:50 +0000
 Subject: [PATCH 1/3] Configure build for GrapheneOS GSI: apps and packages
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
 
 Adapt the AOSP build configuration for GrapheneOS GSI:
 
@@ -24,48 +21,48 @@ Adapt the AOSP build configuration for GrapheneOS GSI:
 ---
  target/product/base_system.mk         | 3 ---
  target/product/generic/Android.bp     | 3 +--
- target/product/gsi/Android.bp         | 7 ++-----
+ target/product/gsi/Android.bp         | 6 ++----
  target/product/handheld_product.mk    | 5 -----
  target/product/handheld_system.mk     | 3 ---
  target/product/handheld_system_ext.mk | 1 -
- 6 files changed, 3 insertions(+), 19 deletions(-)
+ 6 files changed, 3 insertions(+), 18 deletions(-)
 
 diff --git a/target/product/base_system.mk b/target/product/base_system.mk
-index 2f2ccc9..33ce2a6 100644
+index 602e949..bcf42d2 100644
 --- a/target/product/base_system.mk
 +++ b/target/product/base_system.mk
-@@ -230,8 +230,6 @@ PRODUCT_PACKAGES += \
-     mke2fs \
-     mkfs.erofs \
+@@ -238,8 +238,6 @@ PRODUCT_PACKAGES += \
+     mm_daemon \
+     mm_daemon_setup \
      monkey \
 -    misctrl \
 -    mtectrl \
      ndc \
      netd \
      NetworkStack \
-@@ -573,7 +571,6 @@ PRODUCT_PACKAGES_DEBUG := \
+@@ -614,7 +612,6 @@ PRODUCT_PACKAGES_DEBUG := \
      unwind_info \
      unwind_reg_info \
      unwind_symbols \
 -    HardeningTestApp \
- 
+
  # The set of packages whose code can be loaded by the system server.
  PRODUCT_SYSTEM_SERVER_APPS += \
 diff --git a/target/product/generic/Android.bp b/target/product/generic/Android.bp
-index 1d7dcbf..083dd43 100644
+index 06de021..492e8a1 100644
 --- a/target/product/generic/Android.bp
 +++ b/target/product/generic/Android.bp
-@@ -419,7 +419,7 @@ android_filesystem_defaults {
+@@ -426,7 +426,7 @@ android_filesystem_defaults {
          ///////////////////////////////////////////
          // media_product
          ///////////////////////////////////////////
 -        "webview",
-+        "TrichromeWebView",
- 
++        "TrichromeWebView"
+         "preinstalled-packages-media-product.xml",
          ///////////////////////////////////////////
          // base_product
-@@ -817,7 +817,6 @@ system_image_defaults {
-                 "MediaProviderLegacy", // base_system
+@@ -858,7 +858,6 @@ system_image_defaults {
+                 "ManagedProvisioning", // handheld_system
                  "MmsService", // handheld_system
                  "MtpService", // handheld_system
 -                "MusicFX", // handheld_system
@@ -73,26 +70,26 @@ index 1d7dcbf..083dd43 100644
                  "ONS", // telephony_system
                  "PacProcessor", // handheld_system
 diff --git a/target/product/gsi/Android.bp b/target/product/gsi/Android.bp
-index 3fa6e76..82d5705 100644
+index 2ec2eb6..ae9d165 100644
 --- a/target/product/gsi/Android.bp
 +++ b/target/product/gsi/Android.bp
-@@ -129,11 +129,9 @@ android_filesystem_defaults {
+@@ -122,11 +122,10 @@ android_filesystem_defaults {
          ///////////////////////////////////////////
          // gsi_product
          ///////////////////////////////////////////
 -        "Browser2",
 -        "Camera2",
-+        "TrichromeChrome",
          "Dialer",
          "LatinIME",
--        "messaging",
+         "messaging",
++        "TrichromeChrome",
          "apns-full-conf.xml",
          "frameworks-base-overlays",
-     ],
-@@ -187,13 +185,12 @@ android_system_image {
- 
+         "preinstalled-packages-base-product.xml",
+@@ -193,13 +192,12 @@ android_system_image {
+         "preinstalled-packages-platform-telephony-system-ext.xml",
+
          // handheld_product
-         "AvatarPicker",
 -        "Calendar",
          "Contacts",
          "DeskClock",
@@ -103,7 +100,7 @@ index 3fa6e76..82d5705 100644
 -        "QuickSearchBox",
          "SettingsIntelligence",
          "frameworks-base-overlays",
- 
+
 diff --git a/target/product/handheld_product.mk b/target/product/handheld_product.mk
 index 2a4602d..b276cf9 100644
 --- a/target/product/handheld_product.mk
@@ -127,7 +124,7 @@ index 2a4602d..b276cf9 100644
      SettingsIntelligence \
      SpeechServices \
 diff --git a/target/product/handheld_system.mk b/target/product/handheld_system.mk
-index 5c802e0..d2bd0b7 100644
+index 029bdd6..94c586d 100644
 --- a/target/product/handheld_system.mk
 +++ b/target/product/handheld_system.mk
 @@ -47,10 +47,8 @@ PRODUCT_PACKAGES += \
@@ -161,6 +158,5 @@ index 529fa6f..cf9b894 100644
      StorageManager \
      SystemUI \
      WallpaperCropper \
--- 
-2.54.0
-
+--
+2.55.0
