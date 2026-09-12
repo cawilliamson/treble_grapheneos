@@ -1,7 +1,7 @@
 From d0b28ac0bbb498d75add3c207fefa7fb6484a5bd Mon Sep 17 00:00:00 2001
 From: "Christopher A. Williamson" <contact@chrisaw.io>
 Date: Tue, 17 Mar 2026 23:24:50 +0000
-Subject: [PATCH 1/3] Configure build for GrapheneOS GSI: apps and packages
+Subject: [PATCH] Configure build for GrapheneOS GSI: apps and packages
 
 Adapt the AOSP build configuration for GrapheneOS GSI:
 
@@ -18,14 +18,17 @@ Adapt the AOSP build configuration for GrapheneOS GSI:
   ContactsGOS (use AOSP Contacts), BluetoothViewerGOS, TalkBackGOS
   (use standard TalkBack included in handheld_product.mk),
   GrapheneOS Updater (only useful for official GrapheneOS devices)
+- Remove LogViewer from GSI system image
+- Exclude AOSP sample APN list from GSI build
+
 ---
  target/product/base_system.mk         | 3 ---
  target/product/generic/Android.bp     | 3 +--
- target/product/gsi/Android.bp         | 6 ++----
+ target/product/gsi/Android.bp         | 7 ++-----
  target/product/handheld_product.mk    | 5 -----
- target/product/handheld_system.mk     | 3 ---
+ target/product/handheld_system.mk     | 4 ----
  target/product/handheld_system_ext.mk | 1 -
- 6 files changed, 3 insertions(+), 18 deletions(-)
+ 6 files changed, 3 insertions(+), 20 deletions(-)
 
 diff --git a/target/product/base_system.mk b/target/product/base_system.mk
 index 602e949..bcf42d2 100644
@@ -70,10 +73,10 @@ index 06de021..492e8a1 100644
                  "ONS", // telephony_system
                  "PacProcessor", // handheld_system
 diff --git a/target/product/gsi/Android.bp b/target/product/gsi/Android.bp
-index 2ec2eb6..ae9d165 100644
+index 2ec2eb6..8a6e692 100644
 --- a/target/product/gsi/Android.bp
 +++ b/target/product/gsi/Android.bp
-@@ -122,11 +122,10 @@ android_filesystem_defaults {
+@@ -122,12 +122,10 @@ android_filesystem_defaults {
          ///////////////////////////////////////////
          // gsi_product
          ///////////////////////////////////////////
@@ -82,11 +85,12 @@ index 2ec2eb6..ae9d165 100644
          "Dialer",
          "LatinIME",
          "messaging",
+-        "apns-full-conf.xml",
 +        "TrichromeChrome",
-         "apns-full-conf.xml",
          "frameworks-base-overlays",
          "preinstalled-packages-base-product.xml",
-@@ -193,13 +192,12 @@ android_system_image {
+
+@@ -193,13 +191,12 @@ android_system_image {
          "preinstalled-packages-platform-telephony-system-ext.xml",
 
          // handheld_product
@@ -124,10 +128,10 @@ index 2a4602d..b276cf9 100644
      SettingsIntelligence \
      SpeechServices \
 diff --git a/target/product/handheld_system.mk b/target/product/handheld_system.mk
-index 029bdd6..94c586d 100644
+index 029bdd6..83170ad 100644
 --- a/target/product/handheld_system.mk
 +++ b/target/product/handheld_system.mk
-@@ -47,10 +47,8 @@ PRODUCT_PACKAGES += \
+@@ -47,21 +47,17 @@ PRODUCT_PACKAGES += \
      CertInstaller \
      CredentialManager \
      DeviceAsWebcam \
@@ -138,7 +142,10 @@ index 029bdd6..94c586d 100644
      ExternalStorageProvider \
      FusedLocation \
      GmsCompat \
-@@ -61,7 +59,6 @@ PRODUCT_PACKAGES += \
+     InputDevices \
+     KeyChain \
+     librs_jni \
+-    LogViewer \
      ManagedProvisioning \
      MmsService \
      MtpService \
