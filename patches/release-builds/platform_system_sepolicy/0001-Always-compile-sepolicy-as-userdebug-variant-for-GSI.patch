@@ -24,7 +24,7 @@ system in user builds.
  2 files changed, 7 insertions(+), 9 deletions(-)
 
 diff --git a/build/soong/policy.go b/build/soong/policy.go
-index 78f9992..312488e 100644
+index b01cd81..494ca07 100644
 --- a/build/soong/policy.go
 +++ b/build/soong/policy.go
 @@ -157,13 +157,10 @@ func (c *policyConf) buildVariant(ctx android.ModuleContext) string {
@@ -38,20 +38,20 @@ index 78f9992..312488e 100644
 -		return "userdebug"
 -	}
 -	return "user"
-+	// always compile sepolicy as userdebug regardless of the actual build
-+	// variant. GSI builds need the userdebug_or_eng() policy blocks for
-+	// TrebleDroid compat with vendor partitions that expect them.
-+	return "userdebug"
++        // always compile sepolicy as userdebug regardless of the actual build
++        // variant. GSI builds need the userdebug_or_eng() policy blocks for
++        // TrebleDroid compat with vendor partitions that expect them.
++        return "userdebug"
  }
  
  func (c *policyConf) cts() bool {
 diff --git a/private/su.te b/private/su.te
-index fae9b98..9521a74 100644
+index 69c68fc..8a18a92 100644
 --- a/private/su.te
 +++ b/private/su.te
-@@ -23,8 +23,9 @@ userdebug_or_eng(`
-   # own domain.
-   virtualizationservice_use(su)
+@@ -30,8 +30,9 @@ userdebug_or_eng(`
+   typeattribute su_virtualizationmanager treble_labeling_violators;
+   typeattribute su_virtmgr_crosvm treble_labeling_violators;
  
 -  # su is also permissive to permit setenforce.
 -  permissive su;
@@ -62,5 +62,5 @@ index fae9b98..9521a74 100644
    app_domain(su)
  
 -- 
-2.53.0
+2.55.0
 
