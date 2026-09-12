@@ -38,6 +38,14 @@ resource "aws_subnet" "build_c" {
   tags                    = { Name = "gsi-build-c", Project = var.project_tag }
 }
 
+resource "aws_subnet" "build_d" {
+  vpc_id                  = aws_vpc.build.id
+  cidr_block              = "10.0.4.0/24"
+  availability_zone       = "${var.region}d"
+  map_public_ip_on_launch = true
+  tags                    = { Name = "gsi-build-d", Project = var.project_tag }
+}
+
 resource "aws_route_table" "build" {
   vpc_id = aws_vpc.build.id
   tags   = { Name = "gsi-build", Project = var.project_tag }
@@ -60,6 +68,11 @@ resource "aws_route_table_association" "build_b" {
 
 resource "aws_route_table_association" "build_c" {
   subnet_id      = aws_subnet.build_c.id
+  route_table_id = aws_route_table.build.id
+}
+
+resource "aws_route_table_association" "build_d" {
+  subnet_id      = aws_subnet.build_d.id
   route_table_id = aws_route_table.build.id
 }
 

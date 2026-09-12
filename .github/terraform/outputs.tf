@@ -13,6 +13,11 @@ output "subnet_id_c" {
   value       = aws_subnet.build_c.id
 }
 
+output "subnet_id_d" {
+  description = "build subnet in AZ d"
+  value       = aws_subnet.build_d.id
+}
+
 output "security_group_id" {
   description = "build security group for ephemeral instances"
   value       = aws_security_group.build.id

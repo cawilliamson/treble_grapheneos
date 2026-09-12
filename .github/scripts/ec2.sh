@@ -23,14 +23,19 @@ provision() {
   local jit runner_name
   runner_name="ec2-${label}-$(date +%s%N)"
   jit=$(gh_api -X POST "${GH_API}/actions/runners/generate-jitconfig" \
-    -d "{\"name\":\"${runner_name}\",\"runner_group_id\":1,\"labels\":[\"self-hosted\",\"${label}\"]}" \
-    | jq -r '.encoded_jit_config')
-  [ -z "$jit" ] && { echo "ERROR: jit config fetch failed"; exit 1; }
+    -d "{\"name\":\"${runner_name}\",\"runner_group_id\":1,\"labels\":[\"self-hosted\",\"${label}\"]}" |
+    jq -r '.encoded_jit_config')
+  [ -z "$jit" ] && {
+    echo "ERROR: jit config fetch failed"
+    exit 1
+  }
 
   # 2. build shell user-data
   # a plain bash script avoids yaml indentation fragility for the ssh key.
-  local ud_file; ud_file=$(mktemp)
-  local key_delim; key_delim="KEY_EOF_$(head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 32)"
+  local ud_file
+  ud_file=$(mktemp)
+  local key_delim
+  key_delim="KEY_EOF_$(head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 32)"
   {
     printf '%s\n' '#!/bin/bash' 'set -euo pipefail' ''
     printf '%s\n' '# create the runner user'
@@ -97,7 +102,7 @@ provision() {
 
     printf '%s\n' '# start runner'
     printf '%s\n' 'cd /opt/actions-runner && sudo -u github ./run.sh --jitconfig "$(cat /opt/jitconfig)"'
-  } > "$ud_file"
+  } >"$ud_file"
 
   # 3. launch
   local -a market_args=()
@@ -113,7 +118,7 @@ provision() {
     --security-group-ids "$sg" --instance-initiated-shutdown-behavior terminate \
     "${market_args[@]}" --block-device-mappings "${bdm_args[@]}" \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=${tag}-${label}},{Key=Project,Value=${tag}},{Key=Ephemeral,Value=true}]" \
-                    "ResourceType=volume,Tags=[{Key=Project,Value=${tag}},{Key=Ephemeral,Value=true}]" \
+    "ResourceType=volume,Tags=[{Key=Project,Value=${tag}},{Key=Ephemeral,Value=true}]" \
     --user-data "file://${ud_file}" --query 'Instances[0].InstanceId' --output text)
   rm -f "$ud_file"
 
@@ -138,8 +143,8 @@ provision() {
   local registered=false
   for i in $(seq 1 40); do
     local online
-    online=$(gh_api "${GH_API}/actions/runners?per_page=100" \
-      | jq --arg l "$label" -r '[.runners[]|select(.labels[].name==$l)|select(.status=="online")]|length')
+    online=$(gh_api "${GH_API}/actions/runners?per_page=100" |
+      jq --arg l "$label" -r '[.runners[]|select(.labels[].name==$l)|select(.status=="online")]|length')
     echo "  attempt ${i}/40: ${online:-0} online runner(s) with label '${label}'"
     if [ "${online:-0}" -ge 1 ] 2>/dev/null; then
       echo "Runner online"
@@ -163,7 +168,7 @@ provision() {
     echo "instance_id=${iid}"
     echo "subnet_id=${sn}"
     [ -n "$vid" ] && [ "$vid" != "None" ] && echo "data_volume_id=${vid}"
-  } >> "$GITHUB_OUTPUT"
+  } >>"$GITHUB_OUTPUT"
   echo "Provisioned ${iid} in subnet ${sn}"
 }
 
@@ -176,6 +181,7 @@ select_az() {
   local subnet_a="${EC2_SUBNET_ID_A:?}"
   local subnet_b="${EC2_SUBNET_ID_B:?}"
   local subnet_c="${EC2_SUBNET_ID_C:?}"
+  local subnet_d="${EC2_SUBNET_ID_D:?}"
 
   local az_map
   az_map=$(aws ec2 describe-availability-zones \
@@ -221,10 +227,14 @@ select_az() {
   echo "selected $best_az_id ($best_az_name) with score $score" >&2
 
   case "$best_az_name" in
-    *a) echo '{"subnet":"'$subnet_a'","az":"'$best_az_name'"}' ;;
-    *b) echo '{"subnet":"'$subnet_b'","az":"'$best_az_name'"}' ;;
-    *c) echo '{"subnet":"'$subnet_c'","az":"'$best_az_name'"}' ;;
-    *) echo "ERROR: unexpected AZ name $best_az_name" >&2; exit 1 ;;
+  *a) echo '{"subnet":"'$subnet_a'","az":"'$best_az_name'"}' ;;
+  *b) echo '{"subnet":"'$subnet_b'","az":"'$best_az_name'"}' ;;
+  *c) echo '{"subnet":"'$subnet_c'","az":"'$best_az_name'"}' ;;
+  *d) echo '{"subnet":"'$subnet_d'","az":"'$best_az_name'"}' ;;
+  *)
+    echo "ERROR: unexpected AZ name $best_az_name" >&2
+    exit 1
+    ;;
   esac
 }
 
@@ -233,15 +243,18 @@ select_az() {
 # --------------------------------------------------------------------------
 kill_runner() {
   local iid="${EC2_INSTANCE_ID:-}" label="${RUNNER_LABEL:-}"
-  [ -z "$iid" ] && { echo "No instance to kill"; return 0; }
+  [ -z "$iid" ] && {
+    echo "No instance to kill"
+    return 0
+  }
 
   echo "Terminating ${iid}..."
   aws ec2 terminate-instances --region "$REGION" --instance-ids "$iid" || true
 
   if [ -n "$label" ]; then
     local rid
-    rid=$(gh_api "${GH_API}/actions/runners" \
-      | jq --arg l "$label" -r '.runners[]|select(.labels[].name==$l)|.id' 2>/dev/null | head -1) || true
+    rid=$(gh_api "${GH_API}/actions/runners" |
+      jq --arg l "$label" -r '.runners[]|select(.labels[].name==$l)|.id' 2>/dev/null | head -1) || true
     if [ -n "$rid" ] && [ "$rid" != "null" ]; then
       gh_api -X DELETE "${GH_API}/actions/runners/${rid}" || true
       echo "Deregistered runner ${rid}"
@@ -250,8 +263,20 @@ kill_runner() {
 }
 
 case "${1:-}" in
-  provision) shift; provision "$@" ;;
-  select-az) shift; select_az "$@" ;;
-  kill)      shift; kill_runner "$@" ;;
-  *) echo "Usage: $0 {provision|select-az|kill}"; exit 1 ;;
+provision)
+  shift
+  provision "$@"
+  ;;
+select-az)
+  shift
+  select_az "$@"
+  ;;
+kill)
+  shift
+  kill_runner "$@"
+  ;;
+*)
+  echo "Usage: $0 {provision|select-az|kill}"
+  exit 1
+  ;;
 esac
