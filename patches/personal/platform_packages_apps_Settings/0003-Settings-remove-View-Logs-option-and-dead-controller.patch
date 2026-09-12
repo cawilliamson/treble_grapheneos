@@ -9,57 +9,56 @@ click. Remove the preference entries, string resource, and unused
 LogcatLinkPrefController and AppLogcatPreference code.
 ---
  res/values/strings_ext.xml                    |  2 --
- res/xml/system_dashboard_fragment.xml         |  7 ----
+ res/xml/system_dashboard_fragment.xml         |  6 ----
  .../spa/app/appinfo/AppInfoSettings.kt        |  1 -
  .../spa/app/appinfo/AppLogcatPreference.kt    | 29 ----------------
  .../system/LogcatLinkPrefController.java      | 34 -------------------
- 5 files changed, 73 deletions(-)
+ 5 files changed, 72 deletions(-)
  delete mode 100644 src/com/android/settings/spa/app/appinfo/AppLogcatPreference.kt
  delete mode 100644 src/com/android/settings/system/LogcatLinkPrefController.java
 
 diff --git a/res/values/strings_ext.xml b/res/values/strings_ext.xml
-index 3a54ce2..5c245f8 100644
+index 18de9b0..c285471 100644
 --- a/res/values/strings_ext.xml
 +++ b/res/values/strings_ext.xml
-@@ -152,8 +152,6 @@ There are HTTP, HTTPS, DNS, DNS-over-TLS and DNS-over-HTTPS connectivity checks.
+@@ -159,8 +159,6 @@ There are HTTP, HTTPS, DNS, DNS-over-TLS and DNS-over-HTTPS connectivity checks.
      <string name="show_system_process_crash_notifs_title">Notify about system process crashes</string>
      <string name="show_system_process_crash_notifs_summary">Such crashes may indicate exploitation attempts</string>
- 
+
 -    <string name="view_logs">View logs</string>
 -
      <string name="usbc_port_title">USB-C port</string>
      <string name="usbc_port_off_title">Off</string>
      <string name="usbc_port_off_summary">Turns off the USB-C port.
 diff --git a/res/xml/system_dashboard_fragment.xml b/res/xml/system_dashboard_fragment.xml
-index 557eb6b..6eb521b 100644
+index f2aa636..9ccd385 100644
 --- a/res/xml/system_dashboard_fragment.xml
 +++ b/res/xml/system_dashboard_fragment.xml
-@@ -113,13 +113,6 @@
-         <intent android:action="android.settings.SYSTEM_UPDATE_SETTINGS"/>
-     </Preference>
- 
--    <Preference
--        android:key="view_logs"
--        android:title="@string/view_logs"
--        android:icon="@drawable/ic_settings_development"
--        android:order="-39"
--        settings:controller="com.android.settings.system.LogcatLinkPrefController"/>
+@@ -155,12 +155,6 @@
+         android:order="-350"
+         settings:controller="com.android.settings.widget.SystemAdvancedCategoryController">
+
+-        <Preference
+-            android:key="view_logs"
+-            android:title="@string/view_logs"
+-            android:icon="@drawable/ic_settings_development"
+-            settings:controller="com.android.settings.system.LogcatLinkPrefController"/>
 -
-     <Preference
-         android:key="system_multiuser"
-         android:title="@string/user_settings_title"
+         <com.android.settings.spa.preference.ComposePreference
+             android:key="developer_options"
+             settings:controller="com.android.settings.system.DeveloperOptionsController"/>
 diff --git a/src/com/android/settings/spa/app/appinfo/AppInfoSettings.kt b/src/com/android/settings/spa/app/appinfo/AppInfoSettings.kt
-index 0e1fadb..ede3d58 100644
+index 92fe7f4..7122dd9 100644
 --- a/src/com/android/settings/spa/app/appinfo/AppInfoSettings.kt
 +++ b/src/com/android/settings/spa/app/appinfo/AppInfoSettings.kt
-@@ -162,7 +162,6 @@ private fun AppInfoSettings(packageInfoPresenter: PackageInfoPresenter) {
+@@ -176,7 +176,6 @@ private fun AppInfoSettings(packageInfoPresenter: PackageInfoPresenter) {
              AppLocalePreference(app)
              AppOpenByDefaultPreference(app)
              DefaultAppShortcuts(app)
 -            AppLogcatPreference(app)
          }
- 
-         Category(title = stringResource(R.string.unused_apps_category)) {
+
+         if (com.android.window.flags.Flags.virtualGamepadOverride()) {
 diff --git a/src/com/android/settings/spa/app/appinfo/AppLogcatPreference.kt b/src/com/android/settings/spa/app/appinfo/AppLogcatPreference.kt
 deleted file mode 100644
 index 14e3c60..0000000
@@ -135,6 +134,5 @@ index e56f57d..0000000
 -        return true;
 -    }
 -}
--- 
-2.53.0
-
+--
+2.55.0
