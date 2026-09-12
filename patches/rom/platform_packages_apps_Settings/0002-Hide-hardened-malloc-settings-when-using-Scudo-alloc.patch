@@ -32,17 +32,16 @@ index aac4953..c4718b2 100644
 +    override fun getAvailabilityStatus() = UNSUPPORTED_ON_DEVICE
  }
 diff --git a/src/com/android/settings/spa/app/appinfo/AppInfoSettings.kt b/src/com/android/settings/spa/app/appinfo/AppInfoSettings.kt
-index e1fcc52..0e1fadb 100644
+index 1759375..92fe7f4 100644
 --- a/src/com/android/settings/spa/app/appinfo/AppInfoSettings.kt
 +++ b/src/com/android/settings/spa/app/appinfo/AppInfoSettings.kt
-@@ -185,7 +185,6 @@ private fun AppInfoSettings(packageInfoPresenter: PackageInfoPresenter) {
+@@ -227,7 +227,6 @@ private fun AppInfoSettings(packageInfoPresenter: PackageInfoPresenter) {
 
          Category(title = stringResource(R.string.exploit_protection_category_title)) {
              AppExploitProtectionCompatModeSwitchPreference(app, packageInfoPresenter)
 -            com.android.settings.applications.AppHardenedMallocPreference(app)
              com.android.settings.applications.AppMemtagPreference(app)
              com.android.settings.applications.AppExtendedVaSpacePreference(app)
-             com.android.settings.applications.AppNativeDebuggingPreference(app)
--- 
-2.52.0
-
+             com.android.settings.applications.AppExecSpawningPreference(app)
+--
+2.55.0
